@@ -4,6 +4,8 @@ A custom smartphone controller application for Just Dance 2017 on PC. This tool 
 
 It runs as a standalone server on your PC and provides a web interface on your phone to interact with the game in real-time.
 
+This is still on BETA, it's a personal project so it might have some glitches, please let me know in Issues.
+
 ## Features
 
 - **Motion Tracking:** Uses the smartphone accelerometer to track dance moves and score points in the game.
@@ -54,5 +56,5 @@ If you want to modify the code or compile the executable yourself, follow these 
 ## Credits
 
 - Developed by **MAXZØR**. If you use the code please credit me.
-- Portions of the code and protocol logic were adapted from the [JDWebcam](https://github.com/comeraperuibe944/JDWebcam) repository by **comeraperuibe944**.
+- Protocol logic were adapted from the [JDWebcam](https://github.com/comeraperuibe944/JDWebcam) repository by **comeraperuibe944**. Thank you!
 ```
