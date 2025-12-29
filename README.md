@@ -58,4 +58,3 @@ If you want to modify the code or compile the executable yourself, follow these 
 
 - Developed by **MAXZØR**. If you use the code please credit me.
 - Protocol logic were adapted from the [JDWebcam](https://github.com/comeraperuibe944/JDWebcam) repository by **comeraperuibe944**. Thank you!
-```
