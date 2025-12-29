@@ -4,7 +4,7 @@ A custom smartphone controller application for Just Dance 2017 on PC. This tool 
 
 It runs as a standalone server on your PC and provides a web interface on your phone to interact with the game in real-time.
 
-This is still on BETA, it's a personal project so it might have some glitches, please let me know in Issues.
+This is still on BETA, it's a personal project so it might have some glitches, please let me know in [Issues](https://github.com/MaxzorG/Just-Dance-Controller-PC/issues).
 
 ## Features
 
