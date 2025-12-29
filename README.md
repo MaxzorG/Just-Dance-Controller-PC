@@ -13,6 +13,7 @@ This is still on BETA, it's a personal project so it might have some glitches, p
 - **Visual Feedback:** Displays the active coach avatar on the phone while dancing.
 - **Scoreboard:** Shows your current score, star rating immediately after the song ends.
 - **Zero Installation:** Runs as a portable executable file.
+- **Language:** Available in English and Spanish.
 
 ## Requirements
 
