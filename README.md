@@ -54,6 +54,12 @@ If you want to modify the code or compile the executable yourself, follow these 
 
 4. The compiled application will appear in the `dist` folder.
 
+## Legal Disclaimer
+
+This is a non-official, fan-made project. This application is not affiliated with, authorized, maintained, sponsored, or endorsed by Ubisoft Entertainment or any of its affiliates or subsidiaries.
+
+"Just Dance" is a registered trademark of Ubisoft Entertainment. All game content, images, and related assets are the property of their respective owners. This tool is provided for educational and compatibility purposes only, intended to restore functionality for players of Just Dance 2017 on PC following the discontinuation of official support for older mobile applications.
+
 ## Credits
 
 - Developed by **MAXZØR**. If you use the code please credit me.
