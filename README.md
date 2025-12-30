@@ -34,7 +34,7 @@ This is still on BETA, it's a personal project so it might have some glitches, p
 
 Due to security policies in modern browsers regarding local network sensor access:
 
-- **Android:** It is highly recommended to use **Firefox**. If you use Chrome based browsers, you may need to enable specific flags for "insecure origins" to allow accelerometer access. (I'm not sure if this works for everyone, I would still recommend to use Firefox)
+- **Android:** It is highly recommended to use **Firefox**. If you use Chrome based browsers, you may need to enable specific flags for "insecure origins" to allow accelerometer access. (I'm not sure if this works for everyone, I would still recommend to use **Firefox**)
 - **iOS:** Safari requires user interaction to grant sensor permissions (tap the "Connect" button). **I don't have an iPhone to test it on Safari, please let me know!**
 
 ## Build from Source
