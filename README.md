@@ -25,7 +25,7 @@ This is still on BETA, it's a personal project so it might have some glitches, p
 
 1. Download the latest release (`main.exe`).
 2. Run the executable on your PC.
-3. If Windows Firewall prompts for access, select "Allow" (Private and Public networks) to let the phone connect.
+3. If Windows Firewall prompts for access, select "Allow" (Private and Public networks) to let the phone connect. (It always opens the 8000 port)
 4. Open the Just Dance 2017 game on your PC.
 5. On your smartphone, scan the QR code displayed in the application window or manually enter the IP address provided.
 6. Select a song in the game and start dancing.
