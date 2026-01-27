@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f0c29">
+
+    <title>JD Controller PC</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #090818, #181436, #111026);
+            color: white; font-family: 'Segoe UI', system-ui, sans-serif; 
+            text-align: center; display: flex; flex-direction: column; height: 100vh; margin: 0; 
+            touch-action: none; user-select: none; overflow: hidden;
+        }
+        
+        #header { 
+            width: 100%; padding: 15px 20px; 
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: space-between; align-items: center; 
+            flex-shrink: 0; z-index: 100; position: relative; 
+            opacity: 0; transition: opacity 0.5s; pointer-events: none;
+        }
+        #header.visible { opacity: 1; pointer-events: auto; }
+
+        .title-container { text-align: left; }
+        h1 { margin: 0; font-size: 1.1rem; font-weight: 800; font-style: italic; letter-spacing: 0.5px; }
+        .subtitle { font-size: 0.65rem; color: #00f3ff; font-weight: bold; margin-top: 2px; text-transform: uppercase; }
+        .header-controls button { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; padding: 5px 10px; margin-left: 5px; font-weight: bold; font-size: 0.8rem; }
+
+        #connect-zone { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 200;
+            background: radial-gradient(circle at center, #1f1c4d 0%, #090818 100%);
+            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s;
+        }
+        #connect-zone.hidden { transform: scale(1.1); opacity: 0; pointer-events: none; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px; padding: 40px 30px; width: 85%; max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; align-items: center;
+        }
+
+        .logo-text { font-size: 2rem; font-weight: 900; font-style: italic; margin-bottom: 5px; }
+        .logo-accent { color: #00f3ff; }
+        .logo-sub { font-size: 0.8rem; color: rgba(255,255,255,0.5); letter-spacing: 3px; margin-bottom: 30px; text-transform: uppercase; font-weight: 700; }
+
+        button.btn-glass { 
+            width: 100%; padding: 22px; 
+            background: linear-gradient(135deg, #00c6ff, #0072ff); 
+            color: white; border: none; font-size: 1.3rem; font-weight: 900; 
+            border-radius: 20px; cursor: pointer; letter-spacing: 1px;
+            box-shadow: 0 10px 30px rgba(0, 114, 255, 0.4); transition: transform 0.1s;
+        }
+        button.btn-glass:active { transform: scale(0.96); }
+
+        .signature { margin-top: 30px; font-size: 0.7rem; color: rgba(255,255,255,0.3); font-weight: 600; letter-spacing: 1px; }
+
+        #main-container { position: relative; flex-grow: 1; width: 100%; overflow: hidden; opacity: 0; transition: opacity 0.5s 0.3s; }
+        #main-container.visible { opacity: 1; }
+        .ui-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.95); pointer-events: none; visibility: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
+        .ui-screen.active { opacity: 1; transform: scale(1); pointer-events: auto; visibility: visible; z-index: 10; }
+
+        .status-card { width: 200px; height: 200px; border-radius: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #00f3ff; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        #ui-lobby { justify-content: flex-start; padding: 20px; box-sizing: border-box; }
+        h2.lobby-title { color: #fff; margin-bottom: 15px; font-size: 1.3rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; flex-shrink: 0; }
+        #coach-container { display: grid; gap: 12px; margin-bottom: 15px; width: 100%; flex-grow: 1; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); align-content: center; overflow-y: auto; }
+        .btn-coach { background: linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.06)); border: 2px solid rgba(255,255,255,0.1); border-radius: 20px; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 15px; min-height: 180px; transition: transform 0.1s; }
+        .btn-coach.coach-selected { border-color: #00f3ff; background: radial-gradient(circle at bottom, rgba(0, 243, 255, 0.2), transparent 70%); box-shadow: 0 0 25px rgba(0, 243, 255, 0.2) inset; }
+        .coach-img { position: absolute; bottom: 40px; width: 100%; height: 85%; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); pointer-events: none; z-index: 2; }
+        .coach-fallback { font-size: 3rem; color: rgba(255,255,255,0.1); position: absolute; top: 40%; z-index: 1;}
+        .coach-label { z-index: 2; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 5px black; }
+
+        #dance-card { width: 280px; height: 280px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(0, 243, 255, 0.15) 0%, transparent 70%); border: 4px solid rgba(0, 243, 255, 0.3); box-shadow: 0 0 60px rgba(0, 243, 255, 0.2); margin-bottom: 50px; animation: beat 1.2s infinite ease-in-out; }
+        #dance-avatar-img { width: 90%; height: 90%; object-fit: contain; filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.4)); z-index: 2; }
+        @keyframes beat { 0% { transform: scale(1); border-color: rgba(0, 243, 255, 0.3); } 50% { transform: scale(1.03); border-color: rgba(0, 243, 255, 0.8); } 100% { transform: scale(1); border-color: rgba(0, 243, 255, 0.3); } }
+
+        #ui-pause { background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); }
+        .pause-icon { font-size: 3rem; color: #fff; margin-bottom: 20px; background: #00f3ff; border-radius: 25px; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(0, 243, 255, 0.4); }
+        .score-val { font-size: 4.5rem; font-weight: 900; margin-bottom: 30px; font-variant-numeric: tabular-nums; }
+        .stars { font-size: 3.5rem; margin-bottom: 10px; transition: color 0.3s; text-shadow: 0 0 20px currentColor;}
+        .score-rank { font-size: 2rem; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; font-style: italic; }
+
+        .btn-main { width: 90%; padding: 20px; background: white; color: black; font-weight: 900; border: none; border-radius: 25px; font-size: 1.3rem; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 40px rgba(255, 255, 255, 0.15); transition: transform 0.1s; }
+        .btn-main:active { transform: scale(0.98); background: #eee; }
+        .btn-sec { width: 90%; padding: 15px; background: transparent; border: 2px solid #ff4444; color: #ff4444; border-radius: 25px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-sec:active { background: rgba(255, 80, 80, 0.15); }
+
+        #firefox-warning { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; padding: 30px; box-sizing: border-box; text-align: center; }
+        .ff-icon { font-size: 4rem; margin-bottom: 20px; filter: drop-shadow(0 0 20px orange); }
+        .ff-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; color: #ff9900; }
+        .ff-text { font-size: 1rem; color: #ccc; margin-bottom: 30px; line-height: 1.5; }
+        .ff-btn { padding: 15px 30px; background: #ff9900; color: black; font-weight: bold; border: none; border-radius: 50px; font-size: 1rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <div class="title-container">
+            <h1>Just Dance Controller PC</h1>
+            <div class="subtitle">by MAXZØR</div>
+        </div>
+        <div class="header-controls">
+            <button onclick="toggleLanguage()" id="btn-lang">ES</button>
+            <button onclick="toggleFullScreen()">⛶</button>
+        </div>
+    </div>
+
+    <div id="connect-zone">
+        <div class="glass-card">
+            <div class="logo-text">JUST DANCE <span class="logo-accent">CTRL</span></div>
+            <div class="logo-sub">REMOTE APP</div>
+            
+            <input type="hidden" id="ipInput"> 
+            
+            <button class="btn-glass" onclick="attemptConnection()" data-i18n="connect">CONECTAR</button>
+            
+            <div class="signature">by MAXZØR</div>
+        </div>
+    </div>
+
+    <div id="main-container">
+        <div id="ui-menu" class="ui-screen active">
+            <div class="status-card" data-i18n="menu">MENÚ</div>
+            <p style="margin-top:30px; opacity:0.6; font-weight:600;" data-i18n="select_song">Elige canción en PC</p>
+        </div>
+
+        <div id="ui-lobby" class="ui-screen">
+            <h2 class="lobby-title" data-i18n="choose_coach">Elige tu Coach</h2>
+            <div id="coach-container"></div>
+            <button class="btn-sec" onclick="sendBack()" data-i18n="cancel">Cancelar</button>
+            <button class="btn-main" onclick="startGame()" data-i18n="dance">¡BAILAR!</button>
+        </div>
+
+        <div id="ui-dance" class="ui-screen">
+            <div id="dance-card"><img id="dance-avatar-img" src="" alt="Coach" onerror="this.style.display='none'"></div>
+            <div style="width:85%; height:70px; background:rgba(255,255,255,0.05); border-radius:35px; display:flex; align-items:center; position:relative; border:1px solid rgba(255,255,255,0.1);" ontouchstart="startSlide(event)" ontouchmove="moveSlide(event)" ontouchend="endSlide(event)">
+                <div style="width:100%; text-align:center; color:rgba(255,255,255,0.4); font-weight:600; font-size:0.9rem; letter-spacing:2px;" data-i18n="slide">DESLIZA PARA PAUSAR</div>
+                <div id="pause-handle" style="width:60px; height:60px; background:white; border-radius:50%; position:absolute; left:5px; box-shadow:0 0 15px rgba(0,0,0,0.5);"></div>
+            </div>
+        </div>
+
+        <div id="ui-pause" class="ui-screen">
+            <div class="pause-icon">||</div>
+            <h2 data-i18n="paused">PAUSA</h2>
+            <p style="opacity:0.7; margin-top:10px;" data-i18n="use_pc">Usa el PC</p>
+        </div>
+
+        <div id="ui-score" class="ui-screen">
+            <div id="score-rank" class="score-rank"></div>
+            <div class="stars" id="score-stars"></div>
+            <div class="score-val" id="score-val">0</div>
+            <button class="btn-main" onclick="sendContinue()" data-i18n="continue">CONTINUAR</button>
+        </div>
+    </div>
+
+    <div id="firefox-warning">
+        <div class="ff-icon">🦊</div>
+        <div class="ff-title" data-i18n="ff_title">Problema de Navegador</div>
+        <div class="ff-text" data-i18n="ff_body">Chrome/Brave bloquean los sensores. Usa Firefox para Android.</div>
+        <button class="ff-btn" onclick="document.getElementById('firefox-warning').style.display='none'" data-i18n="ff_ok">ENTENDIDO</button>
+    </div>
+
+    <script>
+        let ws, isSending = false, accelBuffer = [], timeStamp = 0, currentIP = "";
+        let availableCoaches = [], selectedCoachIndex = 0, startX = 0;
+
+        const TEXTS = {
+            es: { connect: "CONECTAR", menu: "MENÚ", select_song: "Elige canción en PC", choose_coach: "Elige tu Coach", cancel: "Cancelar", dance: "¡BAILAR!", slide: "DESLIZA PARA PAUSAR", paused: "Juego Pausado", use_pc: "Usa el PC para continuar", continue: "CONTINUAR", just_dancer: "JUST DANCER", superstar: "SUPERSTAR", megastar: "MEGASTAR", ff_title: "Problema de Navegador", ff_body: "Chrome/Brave bloquean los sensores en esta conexión. Por favor usa Firefox para Android.", ff_ok: "ENTENDIDO" },
+            en: { connect: "CONNECT", menu: "MENU", select_song: "Select song on PC", choose_coach: "Choose Coach", cancel: "Cancel", dance: "DANCE!", slide: "SLIDE TO PAUSE", paused: "Game Paused", use_pc: "Use PC to resume", continue: "CONTINUE", just_dancer: "JUST DANCER", superstar: "SUPERSTAR", megastar: "MEGASTAR", ff_title: "Browser Issue", ff_body: "Chrome/Brave blocks sensors on this connection. Please use Firefox for Android.", ff_ok: "GOT IT" }
+        };
+        let lang = 'es';
+
+        function detectIP() {
+            currentIP = window.location.hostname;
+            document.getElementById('ipInput').value = currentIP;
+            console.log("IP Detectada automáticamente: " + currentIP);
+        }
+        detectIP();
+
+        async function attemptConnection() {
+            try { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); } catch(e){}
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                try { await DeviceMotionEvent.requestPermission(); } catch(e){}
+            }
+            
+            connect();
+            checkSensorsAlive();
+        }
+
+        function checkSensorsAlive() {
+            if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1) return;
+            let alive = false;
+            const listener = (e) => { if (e.accelerationIncludingGravity && e.accelerationIncludingGravity.x != null) alive = true; };
+            window.addEventListener('devicemotion', listener);
+            setTimeout(() => {
+                window.removeEventListener('devicemotion', listener);
+                if (!alive) document.getElementById('firefox-warning').style.display = 'flex';
+            }, 1500);
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => {});
+            } else if (document.exitFullscreen) document.exitFullscreen();
+        }
+
+        document.addEventListener('visibilitychange', async () => { if (wakeLock !== null && document.visibilityState === 'visible') try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e){} });
+
+        function connect() {
+            if(!currentIP) currentIP = document.getElementById('ipInput').value;
+            try { ws = new WebSocket(`ws://${currentIP}:8080/smartphone`, "v1.phonescoring.jd.ubisoft.com"); } 
+            catch(e) { return; }
+
+            ws.onopen = () => {
+                document.getElementById('connect-zone').classList.add('hidden');
+                document.getElementById('header').classList.add('visible');
+                document.getElementById('main-container').classList.add('visible');
+                showScreen("MENU");
+                sendJson('JD_PhoneDataCmdHandshakeHello', {'accelAcquisitionFreqHz': 200.0, 'accelAcquisitionLatency': 0.0, 'accelMaxRange': 8.0});
+                
+                window.addEventListener('devicemotion', handleMotion);
+                setInterval(sendLoop, 15);
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    let msg = JSON.parse(event.data);
+                    let cls = msg.__class;
+                    if (cls.includes('HandshakeContinue')) sendJson('JD_PhoneDataCmdSync', {'phoneID': msg.phoneID});
+                    else if (cls.includes('SyncEnd')) sendJson('JD_PhoneDataCmdSyncEnd', {'phoneID': msg.phoneID});
+                    else if (cls.includes('EnableAccel')) { isSending = true; timeStamp = 0; showScreen("DANCE"); }
+                    else if (cls.includes('DisableAccel')) { isSending = false; accelBuffer = []; }
+                    else if (cls === 'JD_PhoneUiSetupData') {
+                        if (msg.setupData) {
+                            if (msg.setupData.lobbySetup) {
+                                availableCoaches = msg.setupData.lobbySetup.coaches || [];
+                                let defaultIdx = availableCoaches.findIndex(c => c.selectedOnEnter === 1);
+                                selectedCoachIndex = (defaultIdx !== -1) ? defaultIdx : 0;
+                                renderCoaches(); showScreen("LOBBY");
+                            }
+                            else if (msg.setupData.gameplaySetup) {
+                                let img = msg.setupData.gameplaySetup.coachImage;
+                                if(img) {
+                                    let danceImg = document.getElementById('dance-avatar-img');
+                                    danceImg.src = `http://${currentIP}:8080${img}`;
+                                    danceImg.style.display = 'block'; 
+                                }
+                                showScreen("DANCE");
+                            }
+                            else if (msg.setupData.recapSetup) {
+                                renderScore(msg.setupData.recapSetup.recapData.songScore);
+                                showScreen("SCORE");
+                            }
+                            else if (msg.setupData.mainCarousel) {
+                                let items = msg.setupData.mainCarousel.rows[0].items;
+                                let isPause = items.some(i => i.title.includes("Resume") || i.title.includes("Quit"));
+                                showScreen(isPause ? "PAUSE" : "MENU");
+                            }
+                            else if(!isSending) showScreen("MENU");
+                        }
+                    }
+                    else if (cls === 'JD_EnableLobbyStartbutton_ConsoleCommandData') showScreen("LOBBY");
+                } catch(e) {}
+            };
+
+            ws.onclose = () => {
+                document.getElementById('connect-zone').classList.remove('hidden');
+                document.getElementById('header').classList.remove('visible');
+                document.getElementById('main-container').classList.remove('visible');
+                alert(lang === 'es' ? "Desconectado" : "Disconnected");
+            };
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.ui-screen').forEach(el => el.classList.remove('active'));
+            let target = document.getElementById('ui-' + id.toLowerCase());
+            if(target) target.classList.add('active');
+        }
+
+        function renderCoaches() {
+            const container = document.getElementById('coach-container');
+            container.innerHTML = '';
+            if (!availableCoaches || availableCoaches.length === 0) return;
+            let cols = (availableCoaches.length === 3) ? "1fr 1fr 1fr" : (availableCoaches.length === 1 ? "1fr" : "1fr 1fr");
+            container.style.gridTemplateColumns = cols;
+            availableCoaches.forEach((coach, index) => {
+                let div = document.createElement('div');
+                div.className = (index === selectedCoachIndex) ? 'btn-coach coach-selected' : 'btn-coach';
+                let imgUrl = `http://${currentIP}:8080${coach.image}`;
+                div.innerHTML = `<div class="coach-fallback">👤</div><img src="${imgUrl}" class="coach-img" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'"><div class="coach-label">P${index+1}</div>`;
+                div.onclick = () => {
+                    if(navigator.vibrate) navigator.vibrate(30);
+                    selectedCoachIndex = index; renderCoaches(); 
+                    sendJson('JD_ChangeCoach_PhoneCommandData', { 'coachId': index });
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function renderScore(score) {
+            document.getElementById('score-val').innerText = score;
+            let starsEl = document.getElementById('score-stars');
+            let rankEl = document.getElementById('score-rank');
+            let color = "#ffd700", rank = TEXTS[lang].just_dancer, nStars = 0;
+            if (score >= 12000) { color = "#d600ff"; rank = TEXTS[lang].megastar; nStars = 5; }
+            else if (score >= 11000) { color = "#00f3ff"; rank = TEXTS[lang].superstar; nStars = 5; }
+            else if (score >= 10000) nStars = 5;
+            else if (score >= 8000) nStars = 4;
+            else if (score >= 6000) nStars = 3;
+            else if (score >= 4000) nStars = 2;
+            else if (score >= 2000) nStars = 1;
+            let html = "";
+            for(let i=0; i<5; i++) html += (i<nStars ? "★" : "<span style='opacity:0.3'>★</span>");
+            starsEl.innerHTML = html; starsEl.style.color = color;
+            rankEl.innerText = rank; rankEl.style.color = color; rankEl.style.textShadow = `0 0 20px ${color}`;
+        }
+
+        function toggleLanguage() {
+            lang = (lang === 'es') ? 'en' : 'es';
+            document.getElementById('btn-lang').innerText = lang.toUpperCase();
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                let k = el.getAttribute('data-i18n');
+                if(TEXTS[lang][k]) el.innerText = TEXTS[lang][k];
+            });
+        }
+        
+        function startGame() { if(navigator.vibrate) navigator.vibrate(100); sendJson('JD_StartGame_PhoneCommandData', {}); }
+        function sendBack() { if(navigator.vibrate) navigator.vibrate([30, 50, 30]); sendJson('JD_Custom_PhoneCommandData', {'identifier': 'SHORTCUT_BACK'}); }
+        function sendContinue() { if(navigator.vibrate) navigator.vibrate(50); sendJson('JD_Input_PhoneCommandData', { 'input': 1084313942 }); }
+        function startSlide(e) { startX = e.touches[0].clientX; }
+        function moveSlide(e) {
+            let diff = e.touches[0].clientX - startX;
+            if (diff < 0) diff = 0; if (diff > 200) diff = 200; 
+            document.getElementById('pause-handle').style.transform = `translateX(${diff}px)`;
+            if (diff >= 180) { if(navigator.vibrate) navigator.vibrate(100); sendJson('JD_Pause_PhoneCommandData', {}); endSlide(); }
+        }
+        function endSlide(e) { document.getElementById('pause-handle').style.transform = `translateX(0px)`; }
+
+        function handleMotion(event) {
+            if (!isSending) return;
+            let acc = event.accelerationIncludingGravity;
+            if (!acc) return;
+            accelBuffer.push([(acc.x||0)/9.8, (acc.z||0)/9.8, (acc.y||0)/9.8]);
+        }
+        function sendLoop() {
+            if (isSending && accelBuffer.length > 0) {
+                sendJson('JD_PhoneScoringData', {'accelData': accelBuffer, 'timeStamp': timeStamp});
+                timeStamp += accelBuffer.length;
+                accelBuffer = [];
+            }
+        }
+        function sendJson(c, d) { if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({'root': {'__class': c, ...d}})); }
+    </script>
+</body>
+</html>
